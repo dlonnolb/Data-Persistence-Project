@@ -51,6 +51,7 @@ public class MainMenu : MonoBehaviour
     public void ExitGame()
     {
         animacionPlayer.Play("TransicionAescena");
+        MenuManager.Instance.SaveDatos();
         StartCoroutine(SalirMenu());
     }
     private IEnumerator IniciarEscena()
