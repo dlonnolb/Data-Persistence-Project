@@ -9,22 +9,33 @@ public class MainManager : MonoBehaviour
     public Brick BrickPrefab;
     public int LineCount = 6;
     public Rigidbody Ball;
-
-    public Text ScoreText;
+    public Animator animacionPlayer;
     public GameObject GameOverText;
-    
     private bool m_Started = false;
-    private int m_Points;
-    
+    private int m_Points;    
     private bool m_GameOver = false;
 
-    
-    // Start is called before the first frame update
+    public Text BestScore;
+    public Text ScoreText;    
+    private string nameBest;
+    private string nameActual;
+    private string scoreBest;
+      
     void Start()
     {
-        const float step = 0.6f;
-        int perLine = Mathf.FloorToInt(4.0f / step);
+        nameActual = MenuManager.Instance.actualName;        
         
+        if (MenuManager.Instance.bestName != "")
+        {
+            nameBest = MenuManager.Instance.bestName;
+        }
+        
+        scoreBest = MenuManager.Instance.bestScore.ToString();
+        BestScore.text = "Best Score: " + nameBest + " : " + scoreBest;
+
+        animacionPlayer.Play("TransicionMenu");
+        const float step = 0.6f;
+        int perLine = Mathf.FloorToInt(4.0f / step);        
         int[] pointCountArray = new [] {1,1,2,2,5,5};
         for (int i = 0; i < LineCount; ++i)
         {
@@ -40,6 +51,8 @@ public class MainManager : MonoBehaviour
 
     private void Update()
     {
+        MenuManager.Instance.actualScore = m_Points;
+
         if (!m_Started)
         {
             if (Input.GetKeyDown(KeyCode.Space))
@@ -59,18 +72,33 @@ public class MainManager : MonoBehaviour
             {
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
+            else if (Input.GetKeyDown(KeyCode.M))
+            {
+                animacionPlayer.Play("TransicionAescena");
+                StartCoroutine(SalirMenu());                
+            }
         }
     }
 
     void AddPoint(int point)
     {
         m_Points += point;
-        ScoreText.text = $"Score : {m_Points}";
+        ScoreText.text = $"{nameActual} Score : {m_Points}";
     }
 
     public void GameOver()
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
+        if (MenuManager.Instance.actualScore > MenuManager.Instance.bestScore)
+        {
+            MenuManager.Instance.bestScore = MenuManager.Instance.actualScore;
+            MenuManager.Instance.bestName = nameActual;
+        }
+    }
+    private IEnumerator SalirMenu()
+    {
+        yield return new WaitForSeconds(1.5f);
+        SceneManager.LoadScene(0);
     }
 }
